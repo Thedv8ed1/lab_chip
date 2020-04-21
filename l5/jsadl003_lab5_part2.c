@@ -18,7 +18,7 @@ void TickFct_Cnt()
 {
   switch(CNT_State) {
     case CNT_SMStart:
-        PORTC = 0x07;
+        PORTC = 0x00;
        CNT_State = CNT_Wait;
     break;
     case CNT_Wait:
@@ -108,7 +108,7 @@ int main(void){
     DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
     DDRC = 0xFF; PORTC = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
     CNT_State = CNT_SMStart; // Indicates initial call
-    PORTC = 0x07;
+    PORTC = 0x00;
    while(1) {
       TickFct_Cnt();
    }
