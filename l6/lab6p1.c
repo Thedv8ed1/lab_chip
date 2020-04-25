@@ -1,4 +1,16 @@
-#include "rims.h"
+/*	Author: jsadl003
+ *  Partner(s) Name: Jason Sadler
+ *	Lab Section: 021
+ *	Assignment: Lab #6  Exercise #1
+ *	Exercise Description: [optional - include for your own benefit]
+ *	DEMO LINK: 
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
+ */
+#include <avr/io.h>
+#ifdef _SIMULATE_
+#include "simAVRHeader.h"
+#endif
 
 volatile unsigned char TimerFlag=0;
 
@@ -46,7 +58,8 @@ void Tick(){
 
 void main()
 {
-   PORTB = 0; //Init outputs
+    DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
+    DDRB = 0x00; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
    TimerSet(1000);
    TimerOn();
    state = Start;
