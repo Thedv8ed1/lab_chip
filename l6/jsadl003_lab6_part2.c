@@ -83,14 +83,11 @@ void Tick(){
         case sB2:
          state = sB0;
         break;
-        default:
-        break;
+        default: break;
     }
     
     switch(state){
-        case Start:
-        
-        break;
+        case Start: break;
         case sB0:
          PORTB = 0x01;
         break;        
@@ -105,24 +102,15 @@ void Tick(){
     }
 }
 
-void Tick_input(){
-
+void Tick_input(){	
  switch(state){
         case Start:
-         
-        break;
-        case sB0:
-         
-        break;
-        case sB1:
-	  if((~PINA&0x01) == 0x01){
+        case sB0:         
+        case sB1:   
+        case sB2:
+         if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
-
-       
-        break;
-        case sB2:
-         
         break;
 	case gameOverWait:
 	  if((~PINA&0x01) == 0x01){
@@ -141,36 +129,24 @@ void Tick_input(){
           }
 
 	break;
-        default:
-        break;
+        default: break;
     }
 
  switch(state){
-        case Start:
-
-        break;
-        case sB0:
-        
-        break;
-        case sB1:
-        
-        break;
-        case sB2:
-        
-        break;
-	case gameOverWait:
-	break;
-	case gameOver:
-	break;
-        default:
-        break;
+        case Start: break;
+        case sB0: break;
+        case sB1: break;
+        case sB2: break;
+	case gameOverWait: break;
+	case gameOver: break;
+        default: break;
     }
 }
 
 int main(void)
 {
     DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-    DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
+    DDRB = 0xFF; PORTB = 0x01; // Configure port B's 8 pins as outputs, initialize to 0s
 
     unsigned int elapsedTime = 0;  
    unsigned char period = 50; 
