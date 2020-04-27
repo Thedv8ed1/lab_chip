@@ -1,7 +1,7 @@
-/*	Author: jsadl003
+Author: jsadl003
  *  Partner(s) Name: Jason Sadler
  *	Lab Section: 021
- *	Assignment: Lab #6  Exercise #2
+ *	Assignment: Lab #6  Exercise #3
  *	Exercise Description: [optional - include for your own benefit]
  *	DEMO LINK: 
  *	I acknowledge all content contained herein, excluding template or example
@@ -67,100 +67,140 @@ void TimerSet(unsigned long M){
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
-enum State{Start, sB0, sB1, sB2, gameOver,gameOverWait} state;
+enum CNT_States { CNT_SMStart, CNT_Wait,CNT_UP,CNT_UP_PRESSED,CNT_DOWN,CNT_DOWN_PRESSED, CNT_Reset } CNT_State;
 
 void Tick(){
-    switch(state){
-        case Start:
-         state = sB0;
-        break;
-        case sB0:
-         state = sB1;
-        break;
-        case sB1:
-	 state = sB2;
-        break;
-        case sB2:
-         state = sB0;
-        break;
-	case gameOver:
-	 //state = gameOverWait;
+   switch(CNT_State) {   
+    case CNT_SMStart:
+        PORTB = 0x07;
+       CNT_State = CNT_Wait;
+    break;
+    case CNT_Wait:
+        if(!(~PINA&0x01) && !(~PINA&0x02)){
+            CNT_State = CNT_Wait;
+        }
+        else if((~PINA&0x01) && !(~PINA&0x02)){
+            CNT_State = CNT_UP;
+        }
+        else if(!(~PINA&0x01) && (~PINA&0x02)){
+            CNT_State = CNT_DOWN;
+        }
+  	else if((~PINA&0x03) == 0x03){
+	    CNT_State = CNT_Reset;		
+	}
+    break;
+    case CNT_UP:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x01) == 0x01){
+            CNT_State = CNT_UP_PRESSED;
+        }
+	else{
+	 CNT_State = CNT_Wait;
+	}
+    break;
+    case CNT_UP_PRESSED:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x01) == 0x01){
+            CNT_State = CNT_UP_PRESSED;
+        }
+        else{
+         CNT_State = CNT_Wait;
+        }
 	break;
-	case gameOverWait: break;
-        default: break;
-    }
-    
-    switch(state){
-        case Start: break;
-        case sB0:
-         PORTB = 0x01;
-        break;        
-        case sB1:
-         PORTB = 0x02;
-        break;        
-        case sB2:
-         PORTB = 0x04;
-        break;
-	case gameOver: break;
-        case gameOverWait: break;
-        default:
-        break;
-    }
+    case CNT_DOWN:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x02) == 0x02){
+            CNT_State = CNT_DOWN_PRESSED;
+        }
+        else{
+         CNT_State = CNT_Wait;
+        }
+    break;
+    case CNT_DOWN_PRESSED:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x02) == 0x02){
+            CNT_State = CNT_DOWN_PRESSED;
+        }
+        else{
+         CNT_State = CNT_Wait;
+        }
+    break;
+    case CNT_Reset:
+	if((~PINA&0xFF) == 0x00){
+        CNT_State = CNT_Wait;
+	}
+	else{
+		CNT_State = CNT_Reset;	
+	}
+		  
+    break;
+  }
+  
+   switch(CNT_State) {   
+    case CNT_SMStart:
+        
+    break;
+    case CNT_Wait:
+    break;
+    case CNT_UP:
+    	if(PORTB<9){
+         PORTB = PORTB+1;
+	}
+    break;
+    case CNT_DOWN:
+    	if(PORTB >0){
+   	PORTB = PORTB-1;
+	}
+    break;
+    case CNT_Reset:
+        PORTB = 0x00;
+    break;
+  }
 }
 
-void Tick_input(){	
- switch(state){
-        case Start: break;
-        case sB0:         
-        case sB1:   
-        case sB2:
-         if((~PINA&0x01) == 0x01){
-            state = gameOverWait;
-          }
-	 break;
-	case gameOverWait:	 	
-	 if((~PINA&0x01) == 0x01){
-            state = gameOverWait;
-          }
-	  else{
-	   state = gameOver;
-	  }
-	break;
-	case gameOver:
-          if((~PINA&0x01) == 0x01){
-            state = Start;
-          }
-	break;
-        default: break;
-    }
-
- switch(state){
-        case Start: break;
-        case sB0: break;
-        case sB1: break;
-        case sB2: break;
-	case gameOverWait: break;
-	case gameOver: break;
-        default: break;
+void CNT(){
+    switch(CNT_State){
+      case CNT_SMStart: break;
+      case CNT_UP: break;
+      case CNT_DOWN: break;
+      case CNT_Reset: break;
+      case CNT_UP_PRESSED:
+         if(PORTB < 9){
+            PORTB = PORTB + 0x01;
+        }
+      break;
+     case CNT_DOWN_PRESSED:
+        if(PORTB > 0){
+            PORTB = PORTB - 0x01;
+        };
+    break;
     }
 }
 
 int main(void)
 {
-    DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-    DDRB = 0xFF; PORTB = 0x01; // Configure port B's 8 pins as outputs, initialize to 0s
-
-    unsigned int elapsedTime = 0;  
-   unsigned char period = 50; 
+  DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
+    DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
+    unsigned long elapsedTime = 1000;
+    const unsigned long period = 100;
+  
    TimerSet(period);
    TimerOn();
-   state = Start;
+   CNT_State = CNT_SMStart;
    while (1) { 
-      if(elapsedTime >= 300){
-          Tick();
-	  elapsedTime = 0;
-      }
-      Tick_input();
+       if(elapsedTime >= 1000){
+           CNT();
+           elapsedTime = 0;
+       }
+      Tick();
       while(!TimerFlag){}
       TimerFlag = 0;
       elapsedTime += period;
