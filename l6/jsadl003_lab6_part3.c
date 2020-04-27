@@ -67,7 +67,7 @@ void TimerSet(unsigned long M){
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
-enum CNT_States { CNT_SMStart, CNT_Wait,CNT_UP, CNT_DOWN,CNT_Reset } CNT_State;
+enum CNT_States { CNT_SMStart, CNT_Wait,CNT_UP,CNT_UP_PRESSED,CNT_DOWN,CNT_DOWN_PRESSED, CNT_Reset } CNT_State;
 
 void Tick(){
    switch(CNT_State) {   
@@ -90,25 +90,47 @@ void Tick(){
 	}
     break;
     case CNT_UP:
-        if((~PINA&0x01) && !(~PINA&0x02)){
-            CNT_State = CNT_UP;
-        }
-	else if((~PINA&0x03)==0x03){
+        if((~PINA&0x03)==0x03){
            CNT_State = CNT_Reset;
         }
-        else if(!(~PINA&0x01)){
-            CNT_State = CNT_Wait;
+        else if ((~PINA&0x01) == 0x01){
+            CNT_State = CNT_UP_PRESSED;
+        }
+	else{
+	 CNT_State = CNT_Wait;
+	}
+    break;
+    case CNT_UP_PRESSED:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x01) == 0x01){
+            CNT_State = CNT_UP_PRESSED;
+        }
+        else{
+         CNT_State = CNT_Wait;
+        }
+	break;
+    case CNT_DOWN:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
+        }
+        else if ((~PINA&0x02) == 0x02){
+            CNT_State = CNT_DOWN_PRESSED;
+        }
+        else{
+         CNT_State = CNT_Wait;
         }
     break;
-    case CNT_DOWN:
-        if(!(~PINA&0x01) && (~PINA&0x02)){
-            CNT_State = CNT_DOWN;
+    case CNT_DOWN_PRESSED:
+        if((~PINA&0x03)==0x03){
+           CNT_State = CNT_Reset;
         }
-        else if((~PINA&0x03)){
-            CNT_State =  CNT_Reset;
+        else if ((~PINA&0x02) == 0x02){
+            CNT_State = CNT_DOWN_PRESSED;
         }
-        else if(!(~PINA&0x02)){
-            CNT_State = CNT_Wait;
+        else{
+         CNT_State = CNT_Wait;
         }
     break;
     case CNT_Reset:
@@ -129,10 +151,14 @@ void Tick(){
     case CNT_Wait:
     break;
     case CNT_UP:
-
+    	if(PORTB<9){
+         PORTB = PORTB+1;
+	}
     break;
     case CNT_DOWN:
-   
+    	if(PORTB >0){
+   	PORTB = PORTB-1;
+	}
     break;
     case CNT_Reset:
         PORTB = 0x00;
@@ -142,12 +168,16 @@ void Tick(){
 
 void CNT(){
     switch(CNT_State){
-      case CNT_UP:
+      case CNT_SMStart: break;
+      case CNT_UP: break;
+      case CNT_DOWN: break;
+      case CNT_Reset: break;
+      case CNT_UP_PRESSED:
          if(PORTB < 9){
             PORTB = PORTB + 0x01;
         }
       break;
-     case CNT_DOWN:
+     case CNT_DOWN_PRESSED:
         if(PORTB > 0){
             PORTB = PORTB - 0x01;
         };
