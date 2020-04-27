@@ -1,4 +1,4 @@
-Author: jsadl003
+/*      Author: jsadl003
  *  Partner(s) Name: Jason Sadler
  *	Lab Section: 021
  *	Assignment: Lab #6  Exercise #3
