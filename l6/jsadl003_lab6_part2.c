@@ -83,6 +83,10 @@ void Tick(){
         case sB2:
          state = sB0;
         break;
+	case gameOver:
+	 //state = gameOverWait;
+	break;
+	case gameOverWait: break;
         default: break;
     }
     
@@ -97,6 +101,8 @@ void Tick(){
         case sB2:
          PORTB = 0x04;
         break;
+	case gameOver: break;
+        case gameOverWait: break;
         default:
         break;
     }
@@ -104,30 +110,26 @@ void Tick(){
 
 void Tick_input(){	
  switch(state){
-        case Start:
+        case Start: break;
         case sB0:         
         case sB1:   
         case sB2:
          if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
-        break;
-	case gameOverWait:
-	  if((~PINA&0x01) == 0x01){
+	 break;
+	case gameOverWait:	 	
+	 if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
-	  else if((~PINA&0x01) == 0x00){
-	    state = gameOver;
+	  else{
+	   state = gameOver;
 	  }
 	break;
 	case gameOver:
-	    if((~PINA&0x01) == 0x01){
+          if((~PINA&0x01) == 0x01){
             state = Start;
           }
-          else if((~PINA&0x01) == 0x00){
-            state = gameOver;
-          }
-
 	break;
         default: break;
     }
@@ -154,14 +156,14 @@ int main(void)
    TimerOn();
    state = Start;
    while (1) { 
-	if(elapsedTime >= 300){
+      if(elapsedTime >= 300){
           Tick();
 	  elapsedTime = 0;
-	}
-	Tick_input();
+      }
+      Tick_input();
       while(!TimerFlag){}
       TimerFlag = 0;
-	elapsedTime += period;
+      elapsedTime += period;
    }
    return 0;
 }
