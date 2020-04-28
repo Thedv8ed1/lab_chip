@@ -1,4 +1,4 @@
-Author: jsadl003
+/*      Author: jsadl003
  *  Partner(s) Name: Jason Sadler
  *	Lab Section: 021
  *	Assignment: Lab #6  Exercise #3
@@ -68,6 +68,7 @@ void TimerSet(unsigned long M){
 }
 
 enum CNT_States { CNT_SMStart, CNT_Wait,CNT_UP,CNT_UP_PRESSED,CNT_DOWN,CNT_DOWN_PRESSED, CNT_Reset } CNT_State;
+unsigned long elapsedTime = 1000;
 
 void Tick(){
    switch(CNT_State) {   
@@ -145,20 +146,19 @@ void Tick(){
   }
   
    switch(CNT_State) {   
-    case CNT_SMStart:
-        
-    break;
-    case CNT_Wait:
-    break;
+    case CNT_SMStart: break;
+    case CNT_Wait: break;
     case CNT_UP:
     	if(PORTB<9){
          PORTB = PORTB+1;
 	}
+	elapsedTime = 0;
     break;
     case CNT_DOWN:
     	if(PORTB >0){
    	PORTB = PORTB-1;
 	}
+	elapsedTime = 0;
     break;
     case CNT_Reset:
         PORTB = 0x00;
@@ -189,7 +189,8 @@ int main(void)
 {
   DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
     DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
-    unsigned long elapsedTime = 1000;
+   // unsigned long elapsedTime = 1000;
+    
     const unsigned long period = 100;
   
    TimerSet(period);
