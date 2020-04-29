@@ -68,14 +68,14 @@ void TimerSet(unsigned long M){
 }
 
 enum State{Start, sB0, sB1, sB2, sB3,gameOver,gameOverWait} state;
-
+unsigned char prevState;
 void Tick(){
     switch(state){
         case Start: state = sB0; PORTB = 0x01; break;
-        case sB0: state = sB1; break;
-        case sB1: state = sB2; break;
-        case sB2: state = sB3; break;  
-	case sB3: state = sB0; break; 	  
+        case sB0: state = sB1; prevState = sB0; break;
+        case sB1: state = sB2; prevState = sB1; break;
+        case sB2: state = sB3; prevState = sB2; break;  
+	case sB3: state = sB0; prevState = sB3; break; 
 	case gameOver: break;
 	case gameOverWait: break;
         default: break;
@@ -113,7 +113,7 @@ void Tick_input(){
 	break;
 	case gameOver:
           if((~PINA&0x01) == 0x01){
-            state = Start;
+            state = prevState;
           }
 	break;
         default: break;
@@ -136,10 +136,10 @@ int main(void)
     DDRB = 0xFF; PORTB = 0x01; // Configure port B's 8 pins as outputs, initialize to 0s
 
     unsigned int elapsedTime = 0;  
-   unsigned char period = 50; 
+   unsigned int period = 100; 
    TimerSet(period);
    TimerOn();
-   state = sB0;
+   state = Start;
    while (1) { 
       Tick_input();
       while(!TimerFlag){}
@@ -149,7 +149,6 @@ int main(void)
           Tick();
           elapsedTime = 0;
       }
-
    }
    return 0;
 }
