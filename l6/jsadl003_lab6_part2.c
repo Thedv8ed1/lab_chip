@@ -71,36 +71,24 @@ enum State{Start, sB0, sB1, sB2, sB3,gameOver,gameOverWait} state;
 
 void Tick(){
     switch(state){
-        case Start: state = sB0; break;
+        case Start: state = sB0; PORTB = 0x01; break;
         case sB0: state = sB1; break;
         case sB1: state = sB2; break;
         case sB2: state = sB3; break;  
 	case sB3: state = sB0; break; 	  
-	case gameOver:
-	 //state = gameOverWait;
-	break;
+	case gameOver: break;
 	case gameOverWait: break;
         default: break;
     }
-    
     switch(state){
         case Start: break;
-        case sB0:
-         PORTB = 0x01;
-        break;        
-        case sB1:
-         PORTB = 0x02;
-        break;        
-        case sB2:
-         PORTB = 0x04;
-        break;
-	case sB3:
-	 PORTB = 0x02;
-	break;
+        case sB0: PORTB = 0x01; break;        
+        case sB1: PORTB = 0x02; break;        
+        case sB2: PORTB = 0x04; break;
+	case sB3: PORTB = 0x02; break;
 	case gameOver: break;
         case gameOverWait: break;
-        default:
-        break;
+        default: break;
     }
 }
 
@@ -130,7 +118,6 @@ void Tick_input(){
 	break;
         default: break;
     }
-
  switch(state){
         case Start: break;
         case sB0: break;
@@ -152,16 +139,17 @@ int main(void)
    unsigned char period = 50; 
    TimerSet(period);
    TimerOn();
-   state = Start;
+   state = sB0;
    while (1) { 
-      if(elapsedTime >= 300){
-          Tick();
-	  elapsedTime = 0;
-      }
       Tick_input();
       while(!TimerFlag){}
       TimerFlag = 0;
       elapsedTime += period;
+      if(elapsedTime >= 300){
+          Tick();
+          elapsedTime = 0;
+      }
+
    }
    return 0;
 }
