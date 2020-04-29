@@ -3,7 +3,7 @@
  *	Lab Section: 021
  *	Assignment: Lab #6  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
- *	DEMO LINK: https://drive.google.com/open?id=1SET3kql3Jd5oePv64Av-AmKWmHMgdFin
+ *	DEMO LINK: 
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
@@ -67,7 +67,7 @@ void TimerSet(unsigned long M){
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
-enum State{Start, sB0, sB1, sB2, gameOver,gameOverWait} state;
+enum State{Start, sB0, sB1, sB2, sB3,gameOver,gameOverWait} state;
 
 void Tick(){
     switch(state){
