@@ -136,7 +136,7 @@ int main(void)
     DDRB = 0xFF; PORTB = 0x01; // Configure port B's 8 pins as outputs, initialize to 0s
 
     unsigned int elapsedTime = 0;  
-   unsigned char period = 50; 
+   unsigned char period = 300; 
    TimerSet(period);
    TimerOn();
    state = sB0;
