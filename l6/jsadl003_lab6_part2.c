@@ -139,7 +139,7 @@ int main(void)
    unsigned int period = 300; 
    TimerSet(period);
    TimerOn();
-   state = sB0;
+   state = Start;
    while (1) { 
       Tick_input();
       while(!TimerFlag){}
