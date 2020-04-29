@@ -110,7 +110,7 @@ void Tick_input(){
         case sB0:         
         case sB1:   
         case sB2:
-        case sB3;
+	case sB3:
          if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
