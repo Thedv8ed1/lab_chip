@@ -71,18 +71,11 @@ enum State{Start, sB0, sB1, sB2, gameOver,gameOverWait} state;
 
 void Tick(){
     switch(state){
-        case Start:
-         state = sB0;
-        break;
-        case sB0:
-         state = sB1;
-        break;
-        case sB1:
-	 state = sB2;
-        break;
-        case sB2:
-         state = sB0;
-        break;
+        case Start: state = sB0; break;
+        case sB0: state = sB1; break;
+        case sB1: state = sB2; break;
+        case sB2: state = sB3; break;  
+	case sB3: state = sB0; break; 	  
 	case gameOver:
 	 //state = gameOverWait;
 	break;
@@ -101,6 +94,9 @@ void Tick(){
         case sB2:
          PORTB = 0x04;
         break;
+	case sB3:
+	 PORTB = 0x02;
+	break;
 	case gameOver: break;
         case gameOverWait: break;
         default:
@@ -114,6 +110,7 @@ void Tick_input(){
         case sB0:         
         case sB1:   
         case sB2:
+        case sB3;
          if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
