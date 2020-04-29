@@ -191,7 +191,7 @@ int main(void)
     DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
    // unsigned long elapsedTime = 1000;
     
-    const unsigned long period = 300;
+    const unsigned long period = 100;
   
    TimerSet(period);
    TimerOn();
