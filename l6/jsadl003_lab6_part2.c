@@ -136,6 +136,7 @@ void Tick_input(){
         case sB0: break;
         case sB1: break;
         case sB2: break;
+	case sB3: break;
 	case gameOverWait: break;
 	case gameOver: break;
         default: break;
