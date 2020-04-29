@@ -152,7 +152,7 @@ int main(void)
    unsigned char period = 50; 
    TimerSet(period);
    TimerOn();
-   state = Start;
+   state = sB0;
    while (1) { 
       if(elapsedTime >= 300){
           Tick();
