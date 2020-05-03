@@ -72,7 +72,7 @@ enum CNT_States { CNT_SMStart, CNT_Wait,CNT_UP,CNT_UP_PRESSED,CNT_DOWN,CNT_DOWN_
 unsigned long elapsedTime = 1000;
 unsigned char cnt;
 void Tick(){
-    LCD_ClearScreen(void);
+    LCD_ClearScreen();
    switch(CNT_State) {   
     case CNT_SMStart:
         cnt = 0x07;
@@ -161,7 +161,7 @@ void Tick(){
     case CNT_DOWN:
     	if(cnt >0){
    	    cnt = cnt-1;
-        PORTB = cnt
+            PORTB = cnt;
 	}
 	elapsedTime = 0;
     break;

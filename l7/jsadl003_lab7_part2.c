@@ -73,7 +73,7 @@ unsigned char prevState;
 unsigned char score;
 void Tick(){
     switch(state){
-        case Start: state = sB0; PORTB = 0x01; score = 5; break;
+        case Start: state = sB0; PORTB = 0x01; score = 5;LCD_WriteData(score + '0'); break;
         case sB0: state = sB1; prevState = sB0; break;
         case sB1: state = sB2; prevState = sB1; break;
         case sB2: state = sB3; prevState = sB2; break;  
@@ -95,21 +95,32 @@ void Tick(){
 }
 
 void Tick_input(){	
-LCD_ClearScreen();
+//LCD_ClearScreen();
  switch(state){
      case Start: break;
      case sB0:  
      case sB2:
       if((~PINA&0x01) == 0x01){
             state = gameOverWait;
-            score--;
-        }
+	    if(score >0){
+              score--;
+	      LCD_ClearScreen();
+	      LCD_WriteData( score + '0' );
+	    }
+     }
      break;
      case sB1:   
-	   case sB3:
+     case sB3:
          if((~PINA&0x01) == 0x01){
             state = gameOverWait;
             score++;
+	    LCD_ClearScreen();
+            if(score < 9){
+               LCD_WriteData( score + '0' );
+            }
+            else{
+               LCD_DisplayString(1, "Pure Waffles!");
+            }
           }
 	 break;
 	case gameOverWait:	 	
@@ -138,12 +149,12 @@ LCD_ClearScreen();
         default: break;
     }
     
-    if(score < 9){
+   /* if(score < 9){
        LCD_WriteData( score + '0' );
     }
     else{
       LCD_DisplayString(1, "Pure Waffles!");
-    }
+    }*/
     
 }
 
