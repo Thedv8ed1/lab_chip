@@ -69,15 +69,14 @@ void TimerSet(unsigned long M){
 }
 
 enum State{Start, sB0, sB1, sB2, sB3,gameOver,gameOverWait} state;
-unsigned char prevState;
 unsigned char score;
 void Tick(){
     switch(state){
-        case Start: state = sB0; PORTB = 0x01; score = 5;LCD_WriteData(score + '0'); break;
-        case sB0: state = sB1; prevState = sB0; break;
-        case sB1: state = sB2; prevState = sB1; break;
-        case sB2: state = sB3; prevState = sB2; break;  
-	case sB3: state = sB0; prevState = sB3; break; 
+        case Start: state = sB0; PORTB = 0x01;  break;
+        case sB0: state = sB1; break;
+        case sB1: state = sB2; break;
+        case sB2: state = sB3; break;  
+	case sB3: state = sB0; break; 
 	case gameOver: break;
 	case gameOverWait: break;
         default: break;
@@ -102,9 +101,11 @@ void Tick_input(){
      case sB2:
       if((~PINA&0x01) == 0x01){
             state = gameOverWait;
+	     LCD_ClearScreen();
+
 	    if(score >0){
               score--;
-	      LCD_ClearScreen();
+	      
 	      LCD_WriteData( score + '0' );
 	    }
      }
@@ -127,60 +128,39 @@ void Tick_input(){
 	 if((~PINA&0x01) == 0x01){
             state = gameOverWait;
           }
-	  else{
-	   state = gameOver;
-	  }
+	  else{ state = gameOver;}
 	break;
 	case gameOver:
           if((~PINA&0x01) == 0x01){
-            state = prevState;
+            state = Start;
           }
 	break;
         default: break;
     }
- switch(state){
-        case Start: break;
-        case sB0: break;
-        case sB1: break;
-        case sB2: break;
-	case sB3: break;
-	case gameOverWait: break;
-	case gameOver: break;
-        default: break;
-    }
-    
-   /* if(score < 9){
-       LCD_WriteData( score + '0' );
-    }
-    else{
-      LCD_DisplayString(1, "Pure Waffles!");
-    }*/
-    
 }
-
-int main(void)
-{
+int main(void){
     DDRA = 0x00; PORTA = 0xFF; 
     DDRB = 0xFF; PORTB = 0x01; 
     DDRC = 0xFF; PORTC = 0x00;
     DDRD = 0xFF; PORTD = 0x00;
     LCD_init();
     LCD_Cursor(1);
-
+   score = 5;
+   LCD_WriteData( score + '0' );
     unsigned int elapsedTime = 0;  
    unsigned int period = 100; 
    TimerSet(period);
    TimerOn();
    state = Start;
    while (1) { 
+     if(elapsedTime >= 300){
+          Tick();
+          elapsedTime = 0;
+      }
       Tick_input();
       while(!TimerFlag){}
       TimerFlag = 0;
       elapsedTime += period;
-      if(elapsedTime >= 300){
-          Tick();
-          elapsedTime = 0;
-      }
    }
    return 0;
 }

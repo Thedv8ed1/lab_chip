@@ -80,71 +80,34 @@ void Tick(){
        CNT_State = CNT_Wait;
     break;
     case CNT_Wait:
-        if(!(~PINA&0x01) && !(~PINA&0x02)){
-            CNT_State = CNT_Wait;
-        }
-        else if((~PINA&0x01) && !(~PINA&0x02)){
-            CNT_State = CNT_UP;
-        }
-        else if(!(~PINA&0x01) && (~PINA&0x02)){
-            CNT_State = CNT_DOWN;
-        }
-  	else if((~PINA&0x03) == 0x03){
-	    CNT_State = CNT_Reset;		
-	}
+        if(!(~PINA&0x01) && !(~PINA&0x02)){ CNT_State = CNT_Wait; }
+        else if((~PINA&0x01) && !(~PINA&0x02)){ CNT_State = CNT_UP; }
+        else if(!(~PINA&0x01) && (~PINA&0x02)){ CNT_State = CNT_DOWN; }
+  	else if((~PINA&0x03) == 0x03){ CNT_State = CNT_Reset; }
     break;
     case CNT_UP:
-        if((~PINA&0x03)==0x03){
-           CNT_State = CNT_Reset;
-        }
-        else if ((~PINA&0x01) == 0x01){
-            CNT_State = CNT_UP_PRESSED;
-        }
-	else{
-	 CNT_State = CNT_Wait;
-	}
+        if((~PINA&0x03)==0x03){ CNT_State = CNT_Reset; }
+        else if ((~PINA&0x01) == 0x01){ CNT_State = CNT_UP_PRESSED; }
+	else{CNT_State = CNT_Wait;}
     break;
     case CNT_UP_PRESSED:
-        if((~PINA&0x03)==0x03){
-           CNT_State = CNT_Reset;
-        }
-        else if ((~PINA&0x01) == 0x01){
-            CNT_State = CNT_UP_PRESSED;
-        }
-        else{
-         CNT_State = CNT_Wait;
-        }
+        if((~PINA&0x03)==0x03){ CNT_State = CNT_Reset; }
+        else if ((~PINA&0x01) == 0x01){ CNT_State = CNT_UP_PRESSED; }
+        else{ CNT_State = CNT_Wait; }
 	break;
     case CNT_DOWN:
-        if((~PINA&0x03)==0x03){
-           CNT_State = CNT_Reset;
-        }
-        else if ((~PINA&0x02) == 0x02){
-            CNT_State = CNT_DOWN_PRESSED;
-        }
-        else{
-         CNT_State = CNT_Wait;
-        }
+        if((~PINA&0x03)==0x03){ CNT_State = CNT_Reset; }
+        else if ((~PINA&0x02) == 0x02){ CNT_State = CNT_DOWN_PRESSED; }
+        else{ CNT_State = CNT_Wait; }
     break;
     case CNT_DOWN_PRESSED:
-        if((~PINA&0x03)==0x03){
-           CNT_State = CNT_Reset;
-        }
-        else if ((~PINA&0x02) == 0x02){
-            CNT_State = CNT_DOWN_PRESSED;
-        }
-        else{
-         CNT_State = CNT_Wait;
-        }
+        if((~PINA&0x03)==0x03){ CNT_State = CNT_Reset;  }
+        else if ((~PINA&0x02) == 0x02){ CNT_State = CNT_DOWN_PRESSED; }
+        else{ CNT_State = CNT_Wait; }
     break;
     case CNT_Reset:
-	if((~PINA&0xFF) == 0x00){
-        CNT_State = CNT_Wait;
-	}
-	else{
-		CNT_State = CNT_Reset;	
-	}
-		  
+	if((~PINA&0xFF) == 0x00){ CNT_State = CNT_Wait; }
+	else{ CNT_State = CNT_Reset; }
     break;
   }
   
@@ -172,7 +135,6 @@ void Tick(){
   }
   LCD_WriteData(cnt + '0');
 }
-
 void CNT(){
     switch(CNT_State){
       case CNT_SMStart: break;
@@ -193,19 +155,14 @@ void CNT(){
     break;
     }
 }
-
-int main(void)
-{
+int main(void){
   DDRA = 0x00; PORTA = 0xFF; 
     DDRB = 0xFF; PORTB = 0x00; 
     DDRC = 0xFF; PORTC = 0x00;
     DDRD = 0xFF; PORTD = 0x00;
     LCD_init();
-    LCD_Cursor(1);
-   // unsigned long elapsedTime = 1000;
-    
+    LCD_Cursor(1);    
     const unsigned long period = 100;
-  
    TimerSet(period);
    TimerOn();
    CNT_State = CNT_SMStart;
