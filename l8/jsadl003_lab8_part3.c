@@ -1,7 +1,7 @@
 /*      Author: jsadl003
  *  Partner(s) Name: Jason Sadler
  *	Lab Section: 021
- *	Assignment: Lab #8  Exercise #1
+ *	Assignment: Lab #8  Exercise #3
  *	Exercise Description: [optional - include for your own benefit]
  *	DEMO LINK: https://drive.google.com/drive/folders/1AGYh0eWDzO4rTBvzvj2v1pzzqf-FzjoY?usp=sharing
  *	I acknowledge all content contained herein, excluding template or example
@@ -81,12 +81,16 @@ int main(void){ // lower 8 on d and upper 2 on c
     ADC_init();
     unsigned short x = ADC;
     unsigned char output;
-  while (1) {
-    x = ADC; 
-   output = x & 0xFF;
-   PORTD = output;
-   output = (x&0x700) >> 8;
-   PORTC = output;    
+    unsigned char max = 0xFF;
+    max = max >> 1;
+  while (1){
+      x = ADC; 
+      output = x;
+      if(output >= max){
+	PORTD = 0x01;
+      }else{
+	PORTD = 0x00;
+      }
    }
    return 0;
 }
