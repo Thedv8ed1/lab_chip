@@ -112,21 +112,19 @@ int main(void){ // lower 8 on d and upper 2 on c
  unsigned short period = 0;
     TimerSet(period);
    TimerOn();
+   PWM_on();
   while (1){
-    if((~PINA)&0x01){
-      set_PWM(440.00);
-      PWM_on();
+    if((~PINA&0xFF)==0x01){//c4
+      set_PWM(261.63);
     }
-    else if((~PINA)&0x02){
-    set_PWM(523.25);
-      PWM_on();
+    else if((~PINA&0xFF)==0x02){ // D4
+      set_PWM(293.66);
     }
-    else if((~PINA)&0x03){
-    set_PWM(349.23);
-      PWM_on();
+    else if((~PINA&0xFF)==0x04){ // E4
+        set_PWM(329.63);
     }
-    else{
-      PWM_off();
+    else if((~PINA&0xFF)==0x00){
+        set_PWM(0);
     }
    }
    return 0;
