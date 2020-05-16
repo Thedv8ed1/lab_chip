@@ -144,6 +144,38 @@ void SpeakerSM(){
     }
     else{ speaker = 0; speakerState = OFF;}
 }
+double frequency = 0;
+//double frequencyChart[] = {261.63,277.18,293.66,311.13,329.63,349.23,392.99,415.30,440.0,466.16,493.88};
+ double frequencyChart[] = {0};
+unsigned char index = 0;
+enum InputStates {released,pressed} inputState;
+void input(){
+	switch(inputState){
+            case released:
+	        if((~PINA&0x03) == 0x00){
+                    inputState = released;
+		}
+		else if((~PINA&0x03) == 0x01){
+		    if(index < 10){
+                        index++;
+			inputState = pressed;
+		    }
+		}
+		 else if((~PINA&0x03) == 0x02){
+                    if(index > 0){
+                        index--;
+                        inputState = pressed;
+                    }
+                }
+//		 frequency = frequencyChart[index];
+		frequency = index;
+		    break;
+	    case pressed:
+                    if((~PINA&0x03) > 0x00){ inputState = pressed; }
+		    else{inputState = released;}
+		    break;
+   }
+}
 void CombineLEDsSM(){ PORTB = threeLEDs | blinkingLED | speaker; }
 int main(void){ 
    DDRA = 0x00; PORTA = 0xFF; 
@@ -151,21 +183,25 @@ int main(void){
    blinkState = blink0;
    threeState = three0;
    speakerState = OFF;
+   frequency = frequencyChart[0];
    unsigned int threeElapsedTime = 0;
    unsigned int blinkElapsedTime = 0;
    unsigned int speakerElapsedTime = 0;
-   unsigned short period = 2;
+   unsigned int inputElapsedTime = 0;
+   unsigned short period = 1;
    TimerSet(period);
    TimerOn();
   while (1){
     if(blinkElapsedTime >= 1000){ BlinkingLEDSM(); blinkElapsedTime = 0; }
     if(threeElapsedTime >= 300){ ThreeLEDsSM(); threeElapsedTime = 0; }
-    if(speakerElapsedTime >= 2){ SpeakerSM(); speakerElapsedTime = 0; }
+    if(speakerElapsedTime >= frequency){ SpeakerSM(); speakerElapsedTime = 0; }
+    if(inputElapsedTime >= 75){input(); inputElapsedTime = 0;}
     CombineLEDsSM();
     while(!TimerFlag){}
     blinkElapsedTime += period;
     threeElapsedTime += period;
     speakerElapsedTime += period;
+    inputElapsedTime += period;
     TimerFlag = 0;
   }
    return 0;
