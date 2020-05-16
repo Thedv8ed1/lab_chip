@@ -78,7 +78,7 @@ void ThreeLEDsSM(){
 		    threeState = three2;
 		    break;		    
 	    case three2:
-		    threeState = three3;
+		    threeState = three0;
 		    break;		    
 	    case three3:
 		    threeState = three0;
@@ -92,22 +92,22 @@ void ThreeLEDsSM(){
 		    threeLEDs = 0x02;
 		    break;		    
 	    case three2:
-		    threeLEDs = 0x04
+		    threeLEDs = 0x04;
 		    break;		    
 	    case three3:
 		    threeLEDs = 0x02;
 		    break;
     }
 }
-unsigned char blinkingLED;
+unsigned char blinkingLED = 0;
 enum BlinkState{blink3,blink0}blinkState;
 void BlinkingLEDSM(){
     switch(blinkState){
 	    case blink3:
-		    blinkState = blink3;
+		    blinkState = blink0;
 		    break;		    
 	    case blink0:
-		    blinkState = blink0;
+		    blinkState = blink3;
 		    break;		    
     }
     switch(blinkState){
@@ -115,7 +115,7 @@ void BlinkingLEDSM(){
 		    blinkingLED = 0x08;
 		    break;		    
 	    case blink0:
-		    blinkingLED = 0x01;
+		    blinkingLED = 0x00;
 		    break;		    
     }
 }
@@ -138,6 +138,7 @@ int main(void){ // lower 8 on d and upper 2 on c
       ThreeLEDsSM();
       BlinkingLEDSM();
       CombineLEDsSM();
+      elapsedTime = 0;
     }
     while(!TimerFlag){}
     TimerFlag = 0;
