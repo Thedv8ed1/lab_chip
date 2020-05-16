@@ -67,15 +67,81 @@ void TimerSet(unsigned long M){
 	_avr_timer_M = M;
 	_avr_timer_cntcurr = _avr_timer_M;
 }
+unsigned char threeLEDs;
+enum ThreeState {three0,three1,three2,three3} threeState;
+void ThreeLEDsSM(){
+	    switch(threeState){
+	    case three0:
+		    threeState = three1;
+		    break;		    
+	    case three1:
+		    threeState = three2;
+		    break;		    
+	    case three2:
+		    threeState = three3;
+		    break;		    
+	    case three3:
+		    threeState = three0;
+		    break;
+    }
+    switch(threeState){
+	    case three0:
+		    threeLEDs = 0x01;
+		    break;		    
+	    case three1:
+		    threeLEDs = 0x02;
+		    break;		    
+	    case three2:
+		    threeLEDs = 0x04
+		    break;		    
+	    case three3:
+		    threeLEDs = 0x02;
+		    break;
+    }
+}
+unsigned char blinkingLED;
+enum BlinkState{blink3,blink0}blinkState;
+void BlinkingLEDSM(){
+    switch(blinkState){
+	    case blink3:
+		    blinkState = blink3;
+		    break;		    
+	    case blink0:
+		    blinkState = blink0;
+		    break;		    
+    }
+    switch(blinkState){
+	    case blink3:
+		    blinkingLED = 0x04;
+		    break;		    
+	    case blink0:
+		    blinkingLED = 0x01;
+		    break;		    
+    }
+}
+//enum CombineState {} combineState;
+void CombineLEDsSM(){
+	PORTB = threeLEDs | blinkingLED;
+}
 
 int main(void){ // lower 8 on d and upper 2 on c
-    DDRA = 0x00; PORTA = 0xFF; 
-    DDRB = 0xFF; PORTB = 0x00; 
- unsigned short period = 0;
-    TimerSet(period);
+   DDRA = 0x00; PORTA = 0xFF; 
+   DDRB = 0xFF; PORTB = 0x00; 
+	blinkState = blink0;
+	threeState = three0;
+   unsigned int elapsedTime = 0;
+     unsigned short period = 100;
+   TimerSet(period);
    TimerOn();
   while (1){
-
-   }
+    if(elapsedTime >= 1000){
+      ThreeLEDsSM();
+      BlinkingLEDSM();
+      CombineLEDsSM();
+    }
+    while(!TimerFlag){}
+    TimerFlag = 0;
+    elapsedTime += period;
+  }
    return 0;
 }
