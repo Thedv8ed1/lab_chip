@@ -112,7 +112,7 @@ void BlinkingLEDSM(){
     }
     switch(blinkState){
 	    case blink3:
-		    blinkingLED = 0x04;
+		    blinkingLED = 0x08;
 		    break;		    
 	    case blink0:
 		    blinkingLED = 0x01;
