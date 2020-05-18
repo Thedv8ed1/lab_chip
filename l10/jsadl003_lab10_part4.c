@@ -106,28 +106,24 @@ void PWM_off(){
 unsigned char threeLEDs;
 enum ThreeState {three0,three1,three2} threeState;
 void ThreeLEDsSM(){
-	    switch(threeState){
+     switch(threeState){
 	    case three0: threeState = three1; break;		    
 	    case three1: threeState = three2; break;		    
-	    case three2: threeState = three0; break;
-    }
+            case three2: threeState = three0; break; }
     switch(threeState){
 	    case three0: threeLEDs = 0x01; break;		    
 	    case three1: threeLEDs = 0x02; break;		    
-	    case three2: threeLEDs = 0x04; break;
-    }
+	    case three2: threeLEDs = 0x04; break; }
 }
 unsigned char blinkingLED = 0;
 enum BlinkState{blink3,blink0}blinkState;
 void BlinkingLEDSM(){
     switch(blinkState){
 	    case blink3: blinkState = blink0; break;		    
-	    case blink0: blinkState = blink3; break;		    
-    }
+	    case blink0: blinkState = blink3; break; }
     switch(blinkState){
 	    case blink3: blinkingLED = 0x08; break;		    
-	    case blink0: blinkingLED = 0x00; break;		    
-    }
+	    case blink0: blinkingLED = 0x00; break; }
 }
 unsigned char speaker = 0;
 enum SpeakerState {ON, OFF} speakerState;
@@ -135,45 +131,34 @@ void SpeakerSM(){
     if((~PINA&0x04) == 0x04){
 	    switch(speakerState){
                 case ON: speakerState = OFF; break;
-                case OFF: speakerState = ON; break;
-            }
+                case OFF: speakerState = ON; break; }
 	    switch(speakerState){
 		case ON: speaker = 0x10; break;
-		case OFF: speaker = 0x00; break;
-	    }
+		case OFF: speaker = 0x00; break; }
     }
     else{ speaker = 0; speakerState = OFF;}
 }
-double frequency = 0;
-//double frequencyChart[] = {261.63,277.18,293.66,311.13,329.63,349.23,392.99,415.30,440.0,466.16,493.88};
- double frequencyChart[] = {0};
-unsigned char index = 0;
+double frequency = 1;
 enum InputStates {released,pressed} inputState;
 void input(){
 	switch(inputState){
             case released:
-	        if((~PINA&0x03) == 0x00){
-                    inputState = released;
-		}
+	        if((~PINA&0x03) == 0x00){ inputState = released; }
 		else if((~PINA&0x03) == 0x01){
-		    if(index < 10){
-                        index++;
+		    if(frequency < 10){
+                        frequency++;
 			inputState = pressed;
 		    }
 		}
 		 else if((~PINA&0x03) == 0x02){
-                    if(index > 0){
-                        index--;
+                    if(frequency > 0){
+                        frequency--;
                         inputState = pressed;
                     }
-                }
-//		 frequency = frequencyChart[index];
-		frequency = index;
-		    break;
+                 } break;
 	    case pressed:
                     if((~PINA&0x03) > 0x00){ inputState = pressed; }
-		    else{inputState = released;}
-		    break;
+		    else{inputState = released;} break;
    }
 }
 void CombineLEDsSM(){ PORTB = threeLEDs | blinkingLED | speaker; }
@@ -183,7 +168,6 @@ int main(void){
    blinkState = blink0;
    threeState = three0;
    speakerState = OFF;
-   frequency = frequencyChart[0];
    unsigned int threeElapsedTime = 0;
    unsigned int blinkElapsedTime = 0;
    unsigned int speakerElapsedTime = 0;
