@@ -18,8 +18,6 @@
 #include "stack.h"
 #include "usart.h"
 #include "timer.h"
-#include "receive.hex"
-#include "send.hex"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
