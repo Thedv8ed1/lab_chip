@@ -10,13 +10,13 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "io.h"
+#include "scheduler.h"
 #include "keypad.h"
 #include "lcd_8bit_task.h"
-#include "queue.h"
-#include "scheduler.h"
+//#include "queue.h"
 #include "seven_seg.h"
-#include "stack.h"
-#include "usart.h"
+//#include "stack.h"
+//#include "usart.h"
 #include "timer.h"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
