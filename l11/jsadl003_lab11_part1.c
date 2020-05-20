@@ -25,8 +25,8 @@
 #endif
 
 //---------Shared Variables----------
-unsighed char led0_output = 0x00;
-unsighed char led1_output = 0x00;
+unsigned char led0_output = 0x00;
+unsigned char led1_output = 0x00;
 unsigned char pause = 0;
 // ------------End shared variables---------
 
@@ -63,7 +63,7 @@ enum toggleLED0_States {toggleLED0_wait, toggleLED0_blink};
 int toggleLED0SMTick(int state){
 	switch(state){
 		case toggleLED0_wait: state = !pause? toggleLED0_blink: toggleLED0_wait; break;
-		case toggleLED0_blink: state = pause? toggleLED0_wait: toggle LED0_blink: break;
+		case toggleLED0_blink: state = pause? toggleLED0_wait: toggleLED0_blink; break;
 		default: state = toggleLED0_wait; break;
 	}
 	switch(state){
@@ -79,7 +79,7 @@ enum toggleLED1_States {toggleLED1_wait, toggleLED1_blink};
 int toggleLED1SMTick(int state){
 	switch(state){
 		case toggleLED1_wait: state = !pause? toggleLED1_blink: toggleLED1_wait; break;
-		case toggleLED1_blink: state = pause? toggleLED1_wait: toggle LED1_blink: break;
+		case toggleLED1_blink: state = pause? toggleLED1_wait: toggleLED1_blink; break;
 		default: state = toggleLED1_wait; break;
 	}
 	switch(state){
@@ -100,7 +100,7 @@ int displaySMTick(int state){
 	}
 	switch(state){
 		case display_display:
-			output = led0_output|led1_output << 1;
+			output = led0_output | led1_output << 1;
 			break;
 	}
 	PORTB = output;
@@ -113,7 +113,7 @@ int main(){
 	
 	//Declare an array of tasks
 	static _task task1, task2, task3, task4;
-	_tast *tasks[] = { &task1, &task2, &task3, &task4};
+	_task *tasks[] = { &task1, &task2, &task3, &task4};
 	const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
 	
 	// Task 1(pauseButtontoggle
