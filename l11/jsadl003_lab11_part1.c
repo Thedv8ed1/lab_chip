@@ -1,85 +1,185 @@
 /*  Author: jsadl003
  *  Partner(s) Name: Jason Sadler
  *	Lab Section: 021
- *	Assignment: Lab #10  Exercise #1
+ *	Assignment: Lab #11  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
- *	DEMO LINK: https://drive.google.com/drive/folders/1daQ4V2l1pZbBfR-VGE9UhORS-BQyPCyH?usp=sharing
+ *	DEMO LINK: 
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "io.h"
+#include "keypad.h"
+#include "lcd_8bit_task.h"
+#include "queue.h"
+#include "scheduler.h"
+#include "seven_seg.h"
+#include "stack.h"
+#include "usart.h"
+#include "timer.h"
+#include "receive.hex"
+#include "send.hex"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
-volatile unsigned char TimerFlag=0;
+//---------Shared Variables----------
+unsighed char led0_output = 0x00;
+unsighed char led1_output = 0x00;
+unsigned char pause = 0;
+// ------------End shared variables---------
 
-// Internal variables for mapping AVR's ISR to our cleaner TimerISR model
-unsigned long _avr_timer_M = 1; // Start count from here, down to 0. Default 1 ms.
-unsigned long _avr_timer_cntcurr = 0; // Current internal count of 1ms ticks
+// Enumeration of states
+enum pauseButtonSM_States {pauseButton_wait, pauseButton_press, pauseButton_release};
 
-void TimerOn(){
-	// AVR timer/counter controller register TCCR1
-	TCCR1B = 0x0B; // bit 3 = 0: CTC mode (clear timer on compare)
-			//bit2bit1bit0 = 011: pre-scaler /64
-			//00001011: 0x0B
-			//so, 8 mhz clocl or 8,000,000 /64 = 125,000 ticks/s
-			//thus TCNT1 register will count at 125,000 ticks
-	// AVR output compare register OCR1A
-	OCR1A = 125; // Timer interrupt will be generated when TCNT1==OCR1A
-			//we want a 1ms tick. 0.001 s * 125,000 ticks = 125
-			//so when TCNT1 register equals 125,
-			//1 ms has passed. this, we comapre to 125
-	// AVR timer interrupt mask register
-	TIMSK1 = 0x02; // bit1: OCIE1A -- enables compare match interrupt
-
-	// init avr counter
-	TCNT1 = 0;
-
-	_avr_timer_cntcurr = _avr_timer_M;
-	// TimerISR will be called every _avr_timer_cntcurr mullisecond
-	//
-	// Enable global interrupt
-	SREG |= 0x80; // 0x08: 1000000
-}
-
-void TimerOff(){
-	TCCR1B = 0x00;
-}
-
-void TimerISR(){
-	TimerFlag = 1;
-}
-
-ISR(TIMER1_COMPA_vect){
-	// cpu automaticalls calls when TCNT1 == OCR1(every 1 ms per timeON settings)
-	_avr_timer_cntcurr--; // count down to 0 rather then up to TOP
-	if(_avr_timer_cntcurr == 0){
-		TimerISR(); // call the isr that the user uses
-		_avr_timer_cntcurr = _avr_timer_M;
+// monitors button connected to PA0
+// when button is pressed, shared cariable "pause" is toggled.
+int pauseButtonSMTick(int state){
+	//local variable
+	unsigned char press = ~PINA&0x01;
+	
+	switch(state){ // state machine transition
+		case pauseButton_wait:
+			state = press == 0x01? pauseButton_press: pauseButton_wait; break;
+		case pauseButton_press:
+			state = pauseButton_release; break;
+		case pauseButton_release:
+			state = press == 0x00? pauseButton_wait:pauseButton_press; break;
+		default: state = pauseButton_wait; break;
 	}
+	switch(state){ // state action
+		case pauseButton_wait: break;
+		case pauseButton_press:
+			pause = (pause == 0) ? 1 : 0; // toggle pause
+		case pauseButton_release: break;
+	}
+	return state;
 }
 
-// set timerISR() to tick every m ms
-void TimerSet(unsigned long M){
-	_avr_timer_M = M;
-	_avr_timer_cntcurr = _avr_timer_M;
+enum toggleLED0_States {toggleLED0_wait, toggleLED0_blink};
+//paused: no toggle PB0
+//unpaused toggle PB0
+int toggleLED0SMTick(int state){
+	switch(state){
+		case toggleLED0_wait: state = !pause? toggleLED0_blink: toggleLED0_wait; break;
+		case toggleLED0_blink: state = pause? toggleLED0_wait: toggle LED0_blink: break;
+		default: state = toggleLED0_wait; break;
+	}
+	switch(state){
+		case toggleLED0_wait: break;
+		case toggleLED0_blink:
+			led0_output = (led0_output == 0x00)? 0x01: 0x00; break;
+	}
+	return state;
+}
+enum toggleLED1_States {toggleLED1_wait, toggleLED1_blink};
+//paused: no toggle PB1
+//unpaused toggle PB1
+int toggleLED1SMTick(int state){
+	switch(state){
+		case toggleLED1_wait: state = !pause? toggleLED1_blink: toggleLED1_wait; break;
+		case toggleLED1_blink: state = pause? toggleLED1_wait: toggle LED1_blink: break;
+		default: state = toggleLED1_wait; break;
+	}
+	switch(state){
+		case toggleLED1_wait: break;
+		case toggleLED1_blink:
+			led0_output = (led1_output == 0x00)? 0x01: 0x00; break;
+	}
+	return state;
 }
 
+enum display_States {display_display};
+int displaySMTick(int state){
+	unsigned char output;
+	
+	switch(state){
+		case display_display: state = display_display; break;
+		default: state = display_display; break;
+	}
+	switch(state){
+		case display_display:
+			output = led0_output|led1_output << 1;
+			break;
+	}
+	PORTB = output;
+	return state;
+}
+
+int main(){
+	DDRA = 0x00; PORTA = 0xFF;
+	DDRB = 0xFF; PORTB = 0x00;
+	
+	//Declare an array of tasks
+	static _task task1, task2, task3, task4;
+	_tast *tasks[] = { &task1, &task2, &task3, &task4};
+	const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
+	
+	// Task 1(pauseButtontoggle
+	task1.state = start;
+	task1.period = 50;
+	task1.elapsedTime = task1.period;
+	task1.TickFct = &pauseButtonToggleSMTick;
+	// task 2 toggleLED0SM
+	task2.state = start;
+	task2.period = 500;
+	task2.elapsedTime = task2.period;
+	task2.TickFct = &toggleLED0SMTick;
+	// task 3 toggleLED1SM	
+	task3.state = start;
+	task3.period = 1000;
+	task3.elapsedTime = task3.period;
+	task3.TickFct = &toggleLED1SMTick;
+	//task 4 displaySM
+	task4.state = start;
+	task4.period = 10;
+	task4.elapsedTime = task4.period;
+	task4.TickFct = &displaySMTick;
+	
+	unsigned long GCD = tasks[0]->period;
+	for(int i = 1; i < numTasks; i++){
+		GCD = findGCD(GCD,tasks[i]->period);	
+	}
+	
+	TimerSet(GCD);
+	TimerOn();
+	return 0;
+}
+/*
 int main(void){ // lower 8 on d and upper 2 on c
-   DDRA = 0x00; PORTA = 0xFF; 
    DDRB = 0xFF; PORTB = 0x00; 
+   DDRC = 0xF0; PORTC = 0x0F;
    unsigned int elapsedTime = 0;
      unsigned short period = 100;
    TimerSet(period);
    TimerOn();
+	unsigned char x;
   while (1){
-
+    x = GetKeyPadKey();
+    switc(x){
+	    case '\0': PORTB = 0x1F; break;
+	    case '1': PORTB = 0x01; break;
+	    case '2': PORTB = 0x02; break;
+	    case '3': PORTB = 0x03; break;
+	    case '4': PORTB = 0x04; break;
+	    case '5': PORTB = 0x05; break;
+	    case '6': PORTB = 0x06; break;
+	    case '7': PORTB = 0x07; break;
+	    case '8': PORTB = 0x08; break;
+	    case '9': PORTB = 0x09; break;
+	    case '0': PORTB = 0x00; break;
+	    case '*': PORTB = 0x0E; break;
+	    case '#': PORTB = 0x0F; break;
+	    case 'A': PORTB = 0x0A; break;
+	    case 'B': PORTB = 0x0B; break;
+	    case 'C': PORTB = 0x0C; break;
+	    case 'D': PORTB = 0x0D; break;
+	    case default: PORTB = 0x1B; break;
+    }
     while(!TimerFlag){}
     TimerFlag = 0;
-
   }
    return 0;
 }
+*/
