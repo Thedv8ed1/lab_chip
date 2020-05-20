@@ -9,12 +9,12 @@
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "io.h"
+//#include "io.h"
 #include "scheduler.h"
 #include "keypad.h"
-#include "lcd_8bit_task.h"
+//#include "lcd_8bit_task.h"
 //#include "queue.h"
-#include "seven_seg.h"
+//#include "seven_seg.h"
 //#include "stack.h"
 //#include "usart.h"
 #include "timer.h"
@@ -110,27 +110,27 @@ int main(){
 	DDRB = 0xFF; PORTB = 0x00;
 	
 	//Declare an array of tasks
-	static _task task1, task2, task3, task4;
-	_task *tasks[] = { &task1, &task2, &task3, &task4};
+	static task task1, task2, task3, task4;
+	task *tasks[] = { &task1, &task2, &task3, &task4};
 	const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
 	
 	// Task 1(pauseButtontoggle
-	task1.state = start;
+	task1.state = 0;
 	task1.period = 50;
 	task1.elapsedTime = task1.period;
-	task1.TickFct = &pauseButtonToggleSMTick;
+	task1.TickFct = &pauseButtonSMTick;
 	// task 2 toggleLED0SM
-	task2.state = start;
+	task2.state = 0;
 	task2.period = 500;
 	task2.elapsedTime = task2.period;
 	task2.TickFct = &toggleLED0SMTick;
 	// task 3 toggleLED1SM	
-	task3.state = start;
+	task3.state = 0;
 	task3.period = 1000;
 	task3.elapsedTime = task3.period;
 	task3.TickFct = &toggleLED1SMTick;
 	//task 4 displaySM
-	task4.state = start;
+	task4.state = 0;
 	task4.period = 10;
 	task4.elapsedTime = task4.period;
 	task4.TickFct = &displaySMTick;
@@ -142,6 +142,20 @@ int main(){
 	
 	TimerSet(GCD);
 	TimerOn();
+	
+	unsigned short i;
+	while(1){
+	    for(i = 0; i < numTasks; i++){
+		    if(tasks[i]->elapsedTime == tasks[i]->period){
+			    tasks[i]->state = tasks[i]->TickFct(tasks[i]->state);
+			    tasks[i]->elapsedTime = 0;
+		    }
+		    tasks[i]->elapsedTime+=GCD;
+	    }
+	    while(!TimerFlag);
+	    TimerFlag = 0;
+	}
+
 	return 0;
 }
 /*
