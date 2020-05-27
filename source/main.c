@@ -41,6 +41,102 @@ transmit_states transmit_state;
 #include "detect_zc.h"
 #include "transmit.h"
 
+void Detect_EQ()
+{
+    switch(detect_eq_state)
+    {
+        case DEQInit:
+            //init variable(s) here.
+            break;
+        default:
+            detect_eq_state = DEQInit;
+            break;
+    }
+    switch(detect_eq_state)
+    {
+        case DEQInit:
+            break;
+        default:
+            break;
+    }
+}
+void Detect_ZC()
+{
+    switch(detect_zc_state)
+    {
+        case DZCInit:
+            break;
+        
+        default:
+            detect_zc_state = DZCInit;
+            break;
+    }
+    switch(detect_zc_state)
+    {
+        case DZCInit:
+            break;
+        default:
+            break;
+    }
+}
+
+void Detect_Max_Amp()
+{
+    switch(detect_max_amp_state)
+    {
+        case DMAInit:
+            break;
+        
+        default:
+            break;
+    }
+    switch(detect_max_amp_state)
+    {
+        case DMAInit:
+            break;
+        default:
+            break;
+    }
+}
+
+void Ping()
+{
+    switch(ping_state)
+    {
+        case PInit:
+            break;
+        default:
+            ping_state = PInit;
+            break;
+    }
+    switch(ping_state)
+    {
+        case PInit:
+            break;
+        default:
+            break;
+    }
+}
+
+void Transmit()
+{
+    switch(transmit_state)
+    {
+        case TInit:
+            break;
+        default:
+            transmit_state = TInit;
+            break;
+    }
+    switch(transmit_state)
+    {
+        case TInit:
+            break;
+        default:
+            break;
+    }
+
+}
 
 /* main function --- do not alter */
 int main(void) {
