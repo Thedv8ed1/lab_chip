@@ -50,6 +50,7 @@ void Detect_EQ()
     {
         case DEQInit:
             //init variable(s) here.
+	    detect_eq_state = DEQWait;
             break;
 	case DEQWait:
 		if((~PINA&0x07) > 0x00 ){// motion detected
@@ -57,7 +58,7 @@ void Detect_EQ()
 		}
 	    break;
 	case DEQMotion:
-	    if(consecutive == 0x0A){
+	    if(consecutive < 0x0A){
 		    detect_eq_state = DEQMotion;
 	    }
 	    else{
@@ -96,6 +97,7 @@ void Detect_ZC()
     switch(detect_zc_state)
     {
         case DZCInit:
+		detect_zc_state = DZCWait;
             break;
 	case DZCWait:
 		if(detected == 0x00){
@@ -126,7 +128,7 @@ void Detect_ZC()
 		    secondTick = direction;
 
 		    if((firstTick&0x03) == (secondTick&0x03)){
-			if((firstTick&0x03) != (secondTick&0x04)){
+			if((firstTick&0x04) != (secondTick&0x04)){
 				vibration = 0x01;
 			}
 		    }
@@ -144,6 +146,7 @@ void Detect_Max_Amp()
     switch(detect_max_amp_state)
     {
         case DMAInit:
+		detect_max_amp_state = DMAWait;
             break;
 	case DMAWait:
 		if((~PINA&0xF8) == 0x00){
@@ -175,6 +178,7 @@ void Ping()
     {
         case PInit:
 		ping = 0;
+		ping_state = PWait;
             break;
 	case PWait:
 	    if(pingCount == 10){
@@ -210,9 +214,10 @@ void Transmit()
     switch(transmit_state)
     {
         case TInit:
+		transmit_state  = TTrans;
             break;
 	case TTrans:
-	PORTB = (direction<<3)|(vibration<<2)|(detected<<1)|ping;
+	PORTB = (direction)|(vibration<<2)|(detected<<1)|ping;
 	    break;
         default:
             transmit_state = TInit;
